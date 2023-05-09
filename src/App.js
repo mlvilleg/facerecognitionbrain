@@ -31,7 +31,7 @@ function App() {
 
   return (
     <div className="App">
-      <Particles
+      <Particles className='particles'
             id="tsparticles"
             init={particlesInit}
             loaded={particlesLoaded}
