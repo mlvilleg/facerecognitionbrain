@@ -59,7 +59,7 @@
             "value": 0.5
         },
         "shape": {
-            "type": "triangle"
+            "type": "circle"
         },
         "size": {
             "value": 
