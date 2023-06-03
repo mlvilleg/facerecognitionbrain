@@ -64,25 +64,25 @@ const returnClarifaiRequestOptions = (imageUrl) => {
 
   }
 
-
+const initialState = {
+  input: '',
+  imageURL: '',
+  box: {},
+  route: 'signin',
+  user:
+    {
+        id: '',
+        name: "",
+        email: "",
+        password: '',
+        entries: 0,
+        joined: ''
+    },
+}
 class App extends Component {
   constructor(){
     super();
-    this.state = {
-      input: '',
-      imageURL: '',
-      box: {},
-      route: 'signin',
-      user:
-        {
-            id: '',
-            name: "",
-            email: "",
-            password: '',
-            entries: 0,
-            joined: ''
-        },
-    }
+    this.state = initialState;
   }
 
   loadUser = (data) => {
@@ -98,8 +98,6 @@ class App extends Component {
 
   }
   calculateFaceLocation = (data) => {
-    console.log(data)
-    console.log(data.outputs[0].data.regions[0].region_info.bounding_box)
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box; 
     const image = document.getElementById('inputImage');
     const width = Number(image.width);
@@ -122,14 +120,12 @@ class App extends Component {
   }
 
   onButtonSubmit = () => {
-    console.log("This Input: ", this.state.input)
+   
     this.setState({imageURL: this.state.input});
     fetch("https://api.clarifai.com/v2/models/" + 'face-detection'  +  "/outputs", returnClarifaiRequestOptions(this.state.input))
         .then(response => response.json())
         .then(response => {
-          console.log('hi', response)
           if (response){
-            console.log("This.state.user", this.state.user)
             fetch('http://localhost:3000/image',{
               method: 'put',
               headers: {'Content-Type': 'application/json'},
@@ -141,6 +137,7 @@ class App extends Component {
               .then(count =>{
                 this.setState(Object.assign(this.state.user, {entries: count}))
               })
+              .catch(console.log)
           }
           this.displayFaceBox(this.calculateFaceLocation(response))
         })
@@ -152,7 +149,8 @@ class App extends Component {
 
   onRouteChange = (route) => {
     if (route == 'signout'){
-      this.setState({isSignedin: false})
+      this.setState(initialState)
+      this.setState({isSignedin: false}) 
     }else if (route == 'home'){
       this.setState({isSignedin: true})
     }
@@ -168,10 +166,13 @@ class App extends Component {
         <Navigation isSignedIn={isSignedin} onRouteChange={this.onRouteChange} />
         {this.state.route == 'home' 
           ?<div>
-          <Logo />
-          <Rank name={this.state.user.name} entries={this.state.user.entries}/>
-          <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
-          <FaceRecognition box={box} imageURL={imageURL}/>
+            <Logo />
+            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
+            <ImageLinkForm 
+              onInputChange={this.onInputChange} 
+              onButtonSubmit={this.onButtonSubmit}
+            />
+            <FaceRecognition box={box} imageURL={imageURL}/>
           </div> 
           : (
             this.state.route == 'signin'
