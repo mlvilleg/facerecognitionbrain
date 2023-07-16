@@ -31,49 +31,49 @@ const initialState = {
 }
 
 
-const returnClarifaiRequestOptions = (imageUrl) => {
+// const returnClarifaiRequestOptions = (imageUrl) => {
 
-  // Your PAT (Personal Access Token) can be found in the portal under Authentification
-  const PAT = '0d1c8e71e323444c9306799bfabeac71';
-  // Specify the correct user_id/app_id pairings
-  // Since you're making inferences outside your app's scope
-  const USER_ID = '4pioyp24vjrr';       
-  const APP_ID = 'Test';
-  // Change these to whatever model and image URL you want to use
-  const MODEL_ID = 'face-detection';
+//   // Your PAT (Personal Access Token) can be found in the portal under Authentification
+//   const PAT = '0d1c8e71e323444c9306799bfabeac71';
+//   // Specify the correct user_id/app_id pairings
+//   // Since you're making inferences outside your app's scope
+//   const USER_ID = '4pioyp24vjrr';       
+//   const APP_ID = 'Test';
+//   // Change these to whatever model and image URL you want to use
+//   const MODEL_ID = 'face-detection';
   
-  const IMAGE_URL = imageUrl;
+//   const IMAGE_URL = imageUrl;
 
-  const raw = JSON.stringify({
-    "user_app_id": {
-        "user_id": USER_ID,
-        "app_id": APP_ID
-    },
-    "inputs": [
-        {
-            "data": {
-                "image": {
-                    "url": IMAGE_URL
-                }
-            }
-        }
-    ]
-});
-
-
-const requestOptions = {
-  method: 'POST',
-  headers: {
-      'Accept': 'application/json',
-      'Authorization': 'Key ' + PAT
-  },
-  body: raw
-};
-console.log("Request Options Output: ", requestOptions)
-return requestOptions;
+//   const raw = JSON.stringify({
+//     "user_app_id": {
+//         "user_id": USER_ID,
+//         "app_id": APP_ID
+//     },
+//     "inputs": [
+//         {
+//             "data": {
+//                 "image": {
+//                     "url": IMAGE_URL
+//                 }
+//             }
+//         }
+//     ]
+// });
 
 
-}
+// const requestOptions = {
+//   method: 'POST',
+//   headers: {
+//       'Accept': 'application/json',
+//       'Authorization': 'Key ' + PAT
+//   },
+//   body: raw
+// };
+// console.log("Request Options Output: ", requestOptions)
+// return requestOptions;
+
+
+// }
 
 class App extends Component {
   constructor(){
@@ -121,20 +121,24 @@ class App extends Component {
     console.log("Button Submit")
     this.setState({imageURL: this.state.input});
     console.log("imageURL: ", this.state.input)
-    fetch("https://api.clarifai.com/v2/models/" + "face-detection" +  "/outputs", returnClarifaiRequestOptions(this.state.input))
-        .then(response => response.json())
-
-    // fetch('http://localhost:3000/imageurl',{
-    //           method: 'post',
-    //           headers: {'Content-Type': 'application/json'},
-    //           body: JSON.stringify({
-    //             input: this.state.input,
-    //           })  
-    //         })
-            .then(response => {
-              if (response){
+    // fetch("https://api.clarifai.com/v2/models/" + "face-detection" +  "/outputs", returnClarifaiRequestOptions(this.state.input))
+    //     .then(response => response.json())
+    fetch('http://localhost:3000/imageurl',{
+              method: 'post',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                input: this.state.input,
+              })  
+            })
+            .then(response => response.json())
+            .then(result => {
+              console.log("TYPE OF RESULT: ", typeof result)
+              console.log("RESULT: ", result)
+              const parsedResponse = JSON.parse(result)
+              console.log("PARSED JSON: ", parsedResponse);
+              if (parsedResponse){
                 console.log('you made it to response')
-                console.log("RESPONSE", response)
+                console.log("RESPONSE", parsedResponse)
                 fetch('http://localhost:3000/image',{
                   method: 'put',
                   headers: {'Content-Type': 'application/json'},
@@ -148,8 +152,8 @@ class App extends Component {
                   })
                   .catch(console.log)
               }
-              console.log('response... ', response)
-              this.displayFaceBox(this.calculateFaceLocation(response))
+              console.log('response... ', parsedResponse)
+              this.displayFaceBox(this.calculateFaceLocation(parsedResponse))
             })
             .catch(err=>console.log(err));
     
